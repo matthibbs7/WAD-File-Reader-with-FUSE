@@ -25,7 +25,7 @@ Wad::Wad(uint8_t *pData){
                           (unsigned char)(pData[9]) << 8 |
                           (unsigned char)(pData[10]) << 16 |
                           (unsigned char)(pData[11]) << 24);
-
+    int offset = header_desc_off;
     //debug
     cout << "debug> header_magic: " << header_magic << endl;
     cout << "debug> header_desc_num: " << header_desc_num << endl;
@@ -33,7 +33,26 @@ Wad::Wad(uint8_t *pData){
 
     //Descriptors 
     for (i = 0; i < header_desc_num; i++){   //loop through number of descriptors
-    
+	 int curr_element_offset = 0;
+	 int curr_element_length = 0;
+	 string name = "";
+	 
+	 // Element Offset
+	 curr_element_offset = int((unsigned char)(pData[offset]) |
+				   (unsigned char)(pData[offset+1]) << 8 |
+				   (unsigned char)(pData[offset+2]) << 16 |
+				   (unsigned char)(pData[offset+3]) << 24);
+	 // Element Length
+	 curr_element_length = int((unsigned char)(pData[offset+4]) |
+				   (unsigned char)(pData[offset+5]) << 8 |
+				   (unsigned char)(pData[offset+6]) << 16 |
+				   (unsigned char)(pData[offset+7]) << 24);
+	// Descriptor Name
+	for (int j = 0; j < 8; j++) {
+		name += pData[offset+j+8];
+	}
+	cout << name << endl;
+	offset += 16;
     }
 }
 

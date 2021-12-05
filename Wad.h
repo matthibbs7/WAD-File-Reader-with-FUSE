@@ -6,8 +6,36 @@
 #include <string>
 #include <cstring>
 #include <fstream>
+#include <list>
+#include <iterator>
 
 using namespace std;
+
+class TreeNode {
+	public:
+		int element_offset;
+		int element_length;
+		string name;
+		string descriptor_path;
+	
+		vector<TreeNode*> children;
+
+		TreeNode(int offset, int length, string title, string path) {
+			element_offset = offset;
+			element_length = length;
+			name = title;
+			descriptor_path = path;
+		}
+
+		TreeNode(int offset, int length, string title, string path, vector<TreeNode*> child) {
+			element_offset = offset;
+			element_length = length;
+			name = title;
+			descriptor_path = path;
+			children = child;
+		}
+		
+};
 
 class Wad {
 	public:
