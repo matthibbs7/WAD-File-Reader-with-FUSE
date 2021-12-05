@@ -1,0 +1,23 @@
+EXPLORING: /
+ [Objects at this level:3]
+ 1. DIR: E1M0
+  [Objects at this level:10]
+  2. CONTENT: 01.txt; Size: 17
+  2. CONTENT: 02.txt; Size: 12
+  2. CONTENT: 03.txt; Size: 12
+  2. CONTENT: 04.txt; Size: 12
+  2. CONTENT: 05.txt; Size: 12
+  2. CONTENT: 06.txt; Size: 12
+  2. CONTENT: 07.txt; Size: 19
+  2. CONTENT: 08.txt; Size: 19
+  2. CONTENT: 09.txt; Size: 10
+  2. CONTENT: 10.txt; Size: 13
+ 1. DIR: Gl
+  [Objects at this level:1]
+  2. DIR: ad
+   [Objects at this level:1]
+   3. DIR: os
+    [Objects at this level:1]
+    4. CONTENT: cake.jpg; Size: 29869
+ 1. CONTENT: mp.txt; Size: 398
+ 
