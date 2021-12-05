@@ -9,27 +9,9 @@
 
 using namespace std;
 
-class Descriptor {
-	public:
-		uint32_t eOffset;
-		uint32_t length;
-		std::string name;
-		std::string path;
-		Descriptor(uint32_t eOffset, uint32_t length, std::string name, std::string path);
-		uint32_t getOffset();
-		uint32_t getLength();
-		std::string getName();
-		std::string getPath();
-};
-
 class Wad {
 	public:
 		static Wad* loadWad(const string &path);
-		uint8_t* pData;
-		uint8_t numD;
-		uint8_t dOffset;
-		string magic;
-		vector<Descriptor> disList;	
 		string getMagic();
 		bool isContent(const string &path);
 		bool isDirectory(const string &path);
