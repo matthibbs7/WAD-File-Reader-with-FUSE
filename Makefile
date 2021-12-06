@@ -8,4 +8,4 @@ wadfs: wadfs.cpp	#wadfs fuse
 test: test.cpp		#test
 	g++ -Wall -o test test.cpp libWad.a -lfuse
 clean: 
-	rm libWad.a libWad.o wadfs test
+	rm -f libWad.a libWad.o wadfs test
