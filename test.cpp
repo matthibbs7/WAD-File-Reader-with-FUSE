@@ -1,4 +1,4 @@
-#include "libWad.h"
+#include "Wad.h"
 
 int main(){
     Wad* new_file = Wad::loadWad("DOOM1.WAD");
