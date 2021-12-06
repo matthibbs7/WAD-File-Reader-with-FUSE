@@ -79,8 +79,10 @@ Wad::Wad(uint8_t *pData){
                 curr_level++;
             }
 
-            curr_node->children.push_back(new TreeNode(curr_element_offset, curr_element_length, name, currPath + name));
-            ten_elements--;
+	    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath + name);
+            curr_node->children.push_back(temp);
+            all_nodes.push_back(temp);
+	    ten_elements--;
             if (ten_elements == 0) {
                 level--;
                 int pathSize = currPath.length();
@@ -104,7 +106,9 @@ Wad::Wad(uint8_t *pData){
                 
                 // at root '/'
                 if (level == 0) {
-                    curr_node->children.push_back(new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/')));
+		    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/'));
+                    curr_node->children.push_back(temp);
+	  	    all_nodes.push_back(temp);
                 }
                 // create root in subdirectory ex: '/example/HERE'
                 else {
@@ -112,8 +116,11 @@ Wad::Wad(uint8_t *pData){
                         curr_node = curr_node->children[curr_node->children.size()-1];
                         curr_level++;
                     }
-                    curr_node->children.push_back(new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/')));
-                }
+		    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/'));
+                    curr_node->children.push_back(temp);
+		    all_nodes.push_back(temp);
+                    
+		}
             
                 ten_elements = 10;
                 mapMarker = name;
@@ -123,14 +130,18 @@ Wad::Wad(uint8_t *pData){
                 curr_level = 0;
                 curr_node = root;
                 if (level == 0) {
-                    curr_node->children.push_back(new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/')));
-                } else {
+		    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/'));
+                    curr_node->children.push_back(temp);
+               	    all_nodes.push_back(temp);
+		} else {
                     while (curr_level < level) {
                         curr_node = curr_node->children[curr_node->children.size()-1];
                         curr_level++;
                     }
-                    curr_node->children.push_back(new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/')));
-                }
+		    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/'));
+                    curr_node->children.push_back(temp);
+                    all_nodes.push_back(temp);
+		}
 
                 level++;
             } // End Dir
@@ -149,13 +160,17 @@ Wad::Wad(uint8_t *pData){
             curr_level = 0;
             curr_node = root;
             if (level == 0) {
-                curr_node->children.push_back(new TreeNode(curr_element_offset, curr_element_length, name, currPath + name));
+		TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath + name);
+                curr_node->children.push_back(temp);
+		all_nodes.push_back(temp);
             } else {
                 while (curr_level < level) {
                     curr_node = curr_node->children[curr_node->children.size()-1];
                     curr_level++;
                 }
-                curr_node->children.push_back(new TreeNode(curr_element_offset, curr_element_length, name, currPath + name));
+		TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath +name);
+                curr_node->children.push_back(temp);
+		all_nodes.push_back(temp);
             }
         }
         
@@ -190,11 +205,34 @@ string Wad::getMagic(){
 }
 
 bool Wad::isContent(const string &path){
-    return 0;
+    	// /dir1/sample1.txt
+
+	return 0;
 }
 
 bool Wad::isDirectory(const string &path){
-    return 0;
+
+	cout << all_nodes[6]->descriptor_path << endl;
+	if ((path).compare(all_nodes[6]->descriptor_path.substr(0, path.length())) == 0) {
+		cout << "success" << endl;
+	}
+	cout << "Sizes: "<< endl;
+	cout << (path + '/').length() << endl;
+	cout << all_nodes[6]->descriptor_path.substr(0, path.length()+1).length() << endl;
+	cout << "Original path + / : " << (path) << endl;
+	cout << "New Path: " << all_nodes[6]->descriptor_path.substr(0, path.length()) << endl;
+	cout << "New Path without subtr: " << all_nodes[6]->descriptor_path << endl;	
+	//for (int i = 0; i < all_nodes.size(); i++) {
+	//	cout << "PATH " << all_nodes[i]->descriptor_path << endl;
+	//	if (path + '/' == all_nodes[i]->descriptor_path) {
+	//		cout << "PATH FOUND" << endl;
+	//		if (all_nodes[i]->element_length == 0) {
+	//			return true;
+	//		}
+	//	}
+	//}
+
+    return false;
 }
 
 int Wad::getSize(const string &path){
