@@ -1,4 +1,4 @@
-all: clean libWad wadfs test
+all: clean libWad wadfs test #default
 	./test
 libWad: libWad.cpp	#library
 	g++ -Wall -c libWad.cpp
