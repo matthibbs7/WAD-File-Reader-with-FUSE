@@ -48,4 +48,9 @@ class Wad {
 		int getDirectory(const string &path, vector<string> *directory);
 		Wad(uint8_t *pdata);
 		~Wad();
+
+		TreeNode* my_root;
+		string magic;
+		string root_path;
+		
 };

@@ -13,6 +13,7 @@ Wad::Wad(uint8_t *pData){
 
         header_magic += pData[i];     //store magic header
     }
+    magic = header_magic;
 
     //Number of Descriptiors
     header_desc_num = int((unsigned char)(pData[4]) |   
@@ -31,7 +32,13 @@ Wad::Wad(uint8_t *pData){
     cout << "debug> header_desc_num: " << header_desc_num << endl;
     cout << "debug> header_desc_off: " << header_desc_off << endl;
 
-    //Descriptors 
+    string mapMarker = "";
+    int ten_elements = 0, level = 0;
+    string currPath = "/";
+    TreeNode* root = new TreeNode(0,0,"root","/");
+    TreeNode* curr_node = root;
+    //Descriptors
+    int curr_level; 
     for (i = 0; i < header_desc_num; i++){   //loop through number of descriptors
 	 int curr_element_offset = 0;
 	 int curr_element_length = 0;
@@ -51,9 +58,116 @@ Wad::Wad(uint8_t *pData){
 	for (int j = 0; j < 8; j++) {
 		name += pData[offset+j+8];
 	}
-	cout << name << endl;
+	cout << currPath + name << endl;
+	
+	// CHECK FOR MARKER ELEMENTS
+	// 1. First Check if of form "E#M#"
+	// 2. Check for _START or _END
+
+	// If it is a directory
+	if (ten_elements > 0) {
+		int counter = count(currPath.begin(), currPath.end(), '/');
+		//TODO add to E#M# dir
+		curr_level = 0;
+		curr_node = root;
+		while (curr_level < level) {
+			curr_node = curr_node->children[curr_node->children.size()-1];
+			curr_level++;
+		}
+		curr_node->children.push_back(new TreeNode(curr_element_offset, curr_element_length, name, currPath + name));
+		ten_elements--;
+		if (ten_elements == 0) {
+			level--;
+			int pathSize = currPath.length();
+			for (int k = pathSize-2; k > -1; k--) {
+				if (currPath[k] == '/') {
+					currPath.pop_back();
+					break;
+				}
+				currPath.pop_back();
+			}
+			offset += 16;
+			continue;
+		}
+	}
+	if (curr_element_length == 0) {
+		// Start 10 element Dir
+		if (name[0] == 'E' && isdigit(name[1]) && name[2] == 'M' && isdigit(name[3])) {
+			curr_level = 0;
+			curr_node = root;
+			
+			// at root '/'
+			if (level == 0) {
+				curr_node->children.push_back(new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/')));
+			}
+			// create root in subdirectory ex: '/example/HERE'
+			else {
+				while (curr_level < level) {
+					curr_node = curr_node->children[curr_node->children.size()-1];
+					curr_level++;
+				}
+				curr_node->children.push_back(new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/')));
+			}
+		
+		
+			//root->children.push_back(new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/'))); 
+			ten_elements = 10;
+			mapMarker = name;
+			level++;
+		} // Open Dir
+		else if (name[name.length()-6] == '_' && name[name.length()-5] == 'S' && name[name.length()-4] == 'T' && name[name.length()-3] == 'A' && name[name.length()-2] == 'R' && name[name.length()-1] == 'T') {
+			curr_level = 0;
+			curr_node = root;
+			if (level == 0) {
+				curr_node->children.push_back(new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/')));
+			} else {
+				while (curr_level < level) {
+					curr_node = curr_node->children[curr_node->children.size()-1];
+					curr_level++;
+				}
+				curr_node->children.push_back(new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/')));
+			}
+
+			level++;
+		} // End Dir
+		else if (name[name.length()-6] == '_' && name[name.length()-5] == 'E' && name[name.length()-4] == 'N' && name[name.length()-3] == 'D') {
+			level--;
+			int pathSize = currPath.length();
+			for (int k = pathSize-2; k > -1; k--) {
+				if (currPath[k] == '/') {
+					currPath.pop_back();
+					break;
+				}
+				currPath.pop_back();
+			}
+		}
+		
+	
+	} else if (ten_elements==0) {
+		curr_level = 0;
+		curr_node = root;
+		if (level == 0) {
+			curr_node->children.push_back(new TreeNode(curr_element_offset, curr_element_length, name, currPath + name));
+		} else {
+			while (curr_level < level) {
+				curr_node = curr_node->children[curr_node->children.size()-1];
+				curr_level++;
+			}
+			curr_node->children.push_back(new TreeNode(curr_element_offset, curr_element_length, name, currPath + name));
+		}
+	}
+	
+	//TODO Load into data structure
+	//TODO Interpret Directory type E#M# or 
+
+
+
+
 	offset += 16;
     }
+    cout << "Printing: " << root->children[0]->children[9]->name << endl;
+    cout << "Printing: " << root->children[1]->name << endl;
+    my_root = root;
 }
 
 Wad* Wad::loadWad(const string &path){
@@ -70,7 +184,7 @@ Wad* Wad::loadWad(const string &path){
 }
 
 string Wad::getMagic(){
-    return 0;
+    return magic;
 }
 
 bool Wad::isContent(const string &path){
