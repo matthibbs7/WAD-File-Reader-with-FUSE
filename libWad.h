@@ -9,6 +9,7 @@
 #include <list>
 #include <iterator>
 
+
 using namespace std;
 
 class TreeNode {
@@ -47,7 +48,7 @@ class Wad {
 		int getDirectory(const string &path, vector<string> *directory);
 		Wad(uint8_t *pdata);
 		~Wad();
-
+		uint8_t* Data;
 		TreeNode* my_root;
 		vector<TreeNode*> all_nodes;
 		string magic;

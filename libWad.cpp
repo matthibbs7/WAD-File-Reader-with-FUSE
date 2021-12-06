@@ -6,7 +6,7 @@ Wad::Wad(uint8_t *pData){
                     check_desc_num = 1, //compare descriptor number to read value
                     i;                  //counter variables
     string          header_magic;       //header magic (file type)
-
+    Data = pData;
     //Magic (File Type)
     for (i = 0; i < 4; i++){
         //debug
@@ -66,8 +66,7 @@ Wad::Wad(uint8_t *pData){
         }
 
         //debug
-        cout << currPath + name << endl;
-        
+ 	cout << currPath + name << endl;       
         // If it is a marker element
         if (ten_elements > 0) {
             //int counter = count(currPath.begin(), currPath.end(), '/');
@@ -97,6 +96,9 @@ Wad::Wad(uint8_t *pData){
                 continue;
             }
         }
+	string name_copy = name;
+	//name_copy = replaceAll(name_copy, {'\0'}, "");
+	//cout << "NAME LENGTH2 : " << name.length() << "LAST CHAR DETECTED: " << name_copy[name_copy.length()-1] << endl;
         // If it is directory
         if (curr_element_length == 0) {
             // Start 10 element Dir
@@ -126,12 +128,15 @@ Wad::Wad(uint8_t *pData){
                 mapMarker = name;
                 level++;
             } // Open Dir
-            else if (name[name.length()-6] == '_' && name[name.length()-5] == 'S' && name[name.length()-4] == 'T' && name[name.length()-3] == 'A' && name[name.length()-2] == 'R' && name[name.length()-1] == 'T') {
+            else if ((name[1] == '_' && name[2] == 'S' && name[3] == 'T' && name[4] == 'A' && name[5] == 'R' && name[6] == 'T') || (name[2] == '_' && name[3] == 'S' && name[4] == 'T' && name[5] == 'A' && name[6] == 'R' && name[7] == 'T')) {
                 curr_level = 0;
                 curr_node = root;
+		
+		
+		
                 if (level == 0) {
 		    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/'));
-                    curr_node->children.push_back(temp);
+		    curr_node->children.push_back(temp);
                	    all_nodes.push_back(temp);
 		} else {
                     while (curr_level < level) {
@@ -145,7 +150,7 @@ Wad::Wad(uint8_t *pData){
 
                 level++;
             } // End Dir
-            else if (name[name.length()-6] == '_' && name[name.length()-5] == 'E' && name[name.length()-4] == 'N' && name[name.length()-3] == 'D') {
+            else if ((name[1] == '_' && name[2] == 'E' && name[3] == 'N' && name[4] == 'D') || (name[2] == '_' && name[3] == 'E' && name[4] == 'N' && name[5] == 'D')) {
                 level--;
                 int pathSize = currPath.length();
                 for (int k = pathSize-2; k > -1; k--) {
@@ -173,7 +178,6 @@ Wad::Wad(uint8_t *pData){
 		all_nodes.push_back(temp);
             }
         }
-        
         offset += 16;
         check_desc_num++;   //increment desc num check
     }
@@ -206,43 +210,100 @@ string Wad::getMagic(){
 
 bool Wad::isContent(const string &path){
     	// /dir1/sample1.txt
-
-	return 0;
+	if (isDirectory(path)) return false;
+	string path_copy;
+	for (int i = 0; i < all_nodes.size(); i++) {
+		path_copy = all_nodes[i]->descriptor_path;
+		path_copy.erase(remove(path_copy.begin(),path_copy.end(),'\0'), path_copy.end());
+		if (path_copy.compare(path) == 0 && all_nodes[i]->element_length != 0) return true;
+	}
+	return false;
 }
 
 bool Wad::isDirectory(const string &path){
-
-	cout << all_nodes[6]->descriptor_path << endl;
-	if ((path).compare(all_nodes[6]->descriptor_path.substr(0, path.length())) == 0) {
-		cout << "success" << endl;
+	string path_copy;
+	for (int i = 0; i < all_nodes.size(); i++) {
+		// store copy of current element path
+		path_copy = all_nodes[i]->descriptor_path;
+		// remove trailing null chars from path
+		path_copy.erase(remove(path_copy.begin(),path_copy.end(), '\0'), path_copy.end());
+		// this will allow the directory format to be either /dir or /dir/
+		if (path_copy.length() - 1 > path.length()) continue;
+		// compress string so compare will be accurate
+		path_copy = path_copy.substr(0, path.length());
+		if (path_copy.compare(path) == 0 && all_nodes[i]->element_length == 0) {
+			return true;
+		}
 	}
-	cout << "Sizes: "<< endl;
-	cout << (path + '/').length() << endl;
-	cout << all_nodes[6]->descriptor_path.substr(0, path.length()+1).length() << endl;
-	cout << "Original path + / : " << (path) << endl;
-	cout << "New Path: " << all_nodes[6]->descriptor_path.substr(0, path.length()) << endl;
-	cout << "New Path without subtr: " << all_nodes[6]->descriptor_path << endl;	
-	//for (int i = 0; i < all_nodes.size(); i++) {
-	//	cout << "PATH " << all_nodes[i]->descriptor_path << endl;
-	//	if (path + '/' == all_nodes[i]->descriptor_path) {
-	//		cout << "PATH FOUND" << endl;
-	//		if (all_nodes[i]->element_length == 0) {
-	//			return true;
-	//		}
-	//	}
-	//}
-
     return false;
 }
 
 int Wad::getSize(const string &path){
-    return 0;
+    	if (isDirectory(path)) return -1;
+	string path_copy;
+	for (int i = 0; i < all_nodes.size(); i++) {
+		path_copy = all_nodes[i]->descriptor_path;
+		path_copy.erase(remove(path_copy.begin(), path_copy.end(), '\0'), path_copy.end());
+		if (path_copy.compare(path) == 0 && all_nodes[i]->element_length !=0) {
+			return all_nodes[i]->element_length;
+		}
+	}
+
+	return -1;
 }
 
 int Wad::getContents(const string &path, char *buffer, int length, int offset){
-    return 0;
+	if (isDirectory(path)) return -1;
+	string path_copy;
+	for (int i = 0; i < all_nodes.size(); i++) {
+		path_copy = all_nodes[i]->descriptor_path;
+		path_copy.erase(remove(path_copy.begin(), path_copy.end(), '\0'), path_copy.end());
+		if (path.compare(path_copy.substr(0,path.length())) == 0) {
+			if (all_nodes[i]->element_length < offset + length) {
+				length = all_nodes[i]->element_length - offset;
+			}
+			for (int k = 0; k < length; k++) {
+				buffer[k] = Data[all_nodes[i]->element_offset + k + offset];
+			}
+			return length;
+		}
+		return -1;
+	}
+	return -1;
 }
 
 int Wad::getDirectory(const string &path, vector<string> *directory){
-    return 0;
+    	string path_copy;
+	int num_elements = 0;
+	if (path.compare("/") == 0) {
+		int level = 0;
+		for (int i = 0; i < all_nodes.size(); i++) {
+			path_copy = all_nodes[i]->descriptor_path;
+			path_copy.erase(remove(path_copy.begin(), path_copy.end(), '\0'), path_copy.end());
+			if (std::count(path_copy.begin(), path_copy.end(), '/') > (level+2)) continue;
+			if (!isDirectory(path_copy) && std::count(path_copy.begin(), path_copy.end(), '/') > (level+1)) continue;
+			num_elements++;
+			directory->push_back(path_copy);
+		}
+		return num_elements;
+	}
+	if (isDirectory(path)) {
+		int level = std::count(path.begin(), path.end(), '/');
+		for (int i = 0; i < all_nodes.size(); i++) {
+			path_copy = all_nodes[i]->descriptor_path;
+			path_copy.erase(remove(path_copy.begin(), path_copy.end(), '\0'), path_copy.end());
+			string path_test = path_copy;
+			path_test.pop_back();
+			if (path_copy.compare(path) != 0 && path_copy.substr(0, path.length()).compare(path) == 0) {
+				if (path_test.compare(path) == 0) continue;
+				if (std::count(path_copy.begin(), path_copy.end(), '/') > (level+2)) continue;
+				if (!isDirectory(path_copy) && std::count(path_copy.begin(), path_copy.end(), '/') > (level+1)) continue;
+				num_elements++;
+				directory->push_back(path_copy);
+
+			}
+		}
+		return num_elements;
+	}
+	return -1;
 }
