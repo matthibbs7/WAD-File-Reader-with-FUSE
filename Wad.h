@@ -34,7 +34,6 @@ class TreeNode {
 			descriptor_path = path;
 			children = child;
 		}
-		
 };
 
 class Wad {
@@ -52,5 +51,4 @@ class Wad {
 		TreeNode* my_root;
 		string magic;
 		string root_path;
-		
 };
