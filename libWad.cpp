@@ -1,4 +1,4 @@
-#include "Wad.h"
+#include "libWad.h"
 
 Wad::Wad(uint8_t *pData){
     unsigned int    header_desc_num,    //header descriptor number
@@ -190,7 +190,7 @@ string Wad::getMagic(){
 }
 
 bool Wad::isContent(const string &path){
-    return 0;d
+    return 0;
 }
 
 bool Wad::isDirectory(const string &path){
