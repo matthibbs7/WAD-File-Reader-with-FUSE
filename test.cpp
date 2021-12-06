@@ -8,5 +8,7 @@ int main(){
     //cout << root->children[0]->children[0]->descriptor_path << endl;
     cout << "GET MAGIC" << endl;
     cout << new_file->getMagic() << endl;
+    cout << new_file->isDirectory("/E1M1") << endl;
+    cout << "PATH /E1M1/" << endl;
     return 0;
 }

@@ -49,6 +49,7 @@ class Wad {
 		~Wad();
 
 		TreeNode* my_root;
+		vector<TreeNode*> all_nodes;
 		string magic;
 		string root_path;
 };
