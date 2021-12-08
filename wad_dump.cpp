@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Wad.h"
+#include "libWad.h"
 
 using namespace std;
 
@@ -10,11 +10,19 @@ void exploreDirectory(Wad *data, const string path, int level)
 
     vector<string> entries;
     cout << "[Objects at this level:" << data->getDirectory(path, &entries) << "]" << endl;
-
+    
     for (string entry : entries)
     {
-        string entryPath = path + entry;
-
+        //entry.pop_back();
+	string entryPath = path + entry;
+	//if (entryPath.compare("/Gl_START/ad_START") == 0) {
+	//	cout << "YES" << endl;
+	//	for (int i = 0; i < entries.size(); i++) {
+//			cout << entries[i] << endl;
+	//	}
+	//}
+	//string entryPath = entry;
+	//cout << "ITEM RETURNED FROM VECTOR: " << entryPath << endl;
         for (int index = 0; index < level; index++)
             cout << " ";
 

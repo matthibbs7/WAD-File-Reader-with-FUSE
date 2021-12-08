@@ -9,9 +9,6 @@ Wad::Wad(uint8_t *pData){
     Data = pData;
     //Magic (File Type)
     for (i = 0; i < 4; i++){
-        //debug
-        cout << "debug> pData[" << i <<  "]: " << pData[i] << endl;
-
         header_magic += pData[i];     //store magic header
     }
     magic = header_magic;
@@ -29,11 +26,6 @@ Wad::Wad(uint8_t *pData){
                           (unsigned char)(pData[11]) << 24);
 
     int offset = header_desc_off;
-
-    //debug
-    cout << "debug> header_magic: " << header_magic << endl;
-    cout << "debug> header_desc_num: " << header_desc_num << endl;
-    cout << "debug> header_desc_off: " << header_desc_off << endl;
 
     string mapMarker = "";
     int ten_elements = 0, level = 0;
@@ -66,7 +58,7 @@ Wad::Wad(uint8_t *pData){
         }
 
         //debug
- 	cout << currPath + name << endl;       
+ 	//cout << currPath + name << endl;       
         // If it is a marker element
         if (ten_elements > 0) {
             //int counter = count(currPath.begin(), currPath.end(), '/');
@@ -182,12 +174,6 @@ Wad::Wad(uint8_t *pData){
         check_desc_num++;   //increment desc num check
     }
 
-    //debug
-    if (check_desc_num != header_desc_num)
-        cout << "ERROR descriptor number: " << check_desc_num << " != " << header_desc_num << endl;
-    else
-        cout << "debug> descriptor number: " << check_desc_num << " = " << header_desc_num << endl;
-
     my_root = root;
 }
 
@@ -197,10 +183,6 @@ Wad* Wad::loadWad(const string &path){
     uint8_t *pData = new uint8_t[(unsigned int)wadFilesize];
     wadFile.seekg(0, std::ios::beg);
     wadFile.read((char *)pData, wadFilesize);
-
-    //debug
-    cout << "debug> filesize: " << wadFilesize << endl;
-
     return new Wad(pData);
 }
 
@@ -252,6 +234,8 @@ int Wad::getSize(const string &path){
 	return -1;
 }
 
+
+
 int Wad::getContents(const string &path, char *buffer, int length, int offset){
 	if (isDirectory(path)) return -1;
 	string path_copy;
@@ -272,6 +256,10 @@ int Wad::getContents(const string &path, char *buffer, int length, int offset){
 	return -1;
 }
 
+//int Wad::getDirectory(const string &path, vector<string> *directory) {
+
+//}
+
 int Wad::getDirectory(const string &path, vector<string> *directory){
     	string path_copy;
 	int num_elements = 0;
@@ -283,6 +271,10 @@ int Wad::getDirectory(const string &path, vector<string> *directory){
 			if (std::count(path_copy.begin(), path_copy.end(), '/') > (level+2)) continue;
 			if (!isDirectory(path_copy) && std::count(path_copy.begin(), path_copy.end(), '/') > (level+1)) continue;
 			num_elements++;
+			path_copy.erase(0,1);
+			if (path_copy[path_copy.length()-1] == '/') path_copy.pop_back();
+			//cout << "Added: " << path_copy << " " << path_copy.length() << " to vector" << endl;
+			//cout << "Compared with name: " << all_nodes[i]->name << " " << all_nodes[i]->name.length() << endl;
 			directory->push_back(path_copy);
 		}
 		return num_elements;
@@ -296,10 +288,15 @@ int Wad::getDirectory(const string &path, vector<string> *directory){
 			path_test.pop_back();
 			if (path_copy.compare(path) != 0 && path_copy.substr(0, path.length()).compare(path) == 0) {
 				if (path_test.compare(path) == 0) continue;
-				if (std::count(path_copy.begin(), path_copy.end(), '/') > (level+2)) continue;
-				if (!isDirectory(path_copy) && std::count(path_copy.begin(), path_copy.end(), '/') > (level+1)) continue;
+				if (std::count(path_copy.begin(), path_copy.end(), '/') > (level+1)) continue;
+				if (!isDirectory(path_copy) && std::count(path_copy.begin(), path_copy.end(), '/') > (level)) continue;
 				num_elements++;
-				directory->push_back(path_copy);
+				//cout << "Added: " << path_copy << " " << path_copy.length() << " to vector compared" << endl;
+				
+				string title = all_nodes[i]->name;
+				title.erase(remove(title.begin(), title.end(), '\0'), title.end());
+				//cout << "With name: " << all_nodes[i]->name << " " << title.length() << endl;
+				directory->push_back(title);
 
 			}
 		}
@@ -307,3 +304,25 @@ int Wad::getDirectory(const string &path, vector<string> *directory){
 	}
 	return -1;
 }
+/*
+int Wad::getDirectory(const string &path, vector<string> *directory) {
+	if (isContent(path)) return -1;
+	cout << "test" << endl;
+	string copy_path;
+	if (path.compare("/") != 0) {
+	for (int i = 0; i < all_nodes.size(); i++) {
+		copy_path = all_nodes[i]->descriptor_path;
+		copy_path.erase(remove(copy_path.begin(), copy_path.end(), '\0'), copy_path.end());
+		cout << copy_path << endl;
+		if (path.compare(copy_path.substr(0,path.length())) == 0) {
+			string title;
+			for (int k = 0; k < all_nodes[i]->children.size(); k++) {
+				title = all_nodes[i]->children[k]->name;
+				title.erase(remove(title.begin(), title.end(), '\0'), title.end());
+				directory->push_back(title);
+			}
+		}
+	}
+	}
+}
+*/
