@@ -203,6 +203,7 @@ bool Wad::isContent(const string &path){
 }
 
 bool Wad::isDirectory(const string &path){
+	if (path.compare("/") == 0) return true;
 	string path_copy;
 	for (int i = 0; i < all_nodes.size(); i++) {
 		// store copy of current element path

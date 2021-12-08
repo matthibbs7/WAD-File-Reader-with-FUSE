@@ -10,12 +10,11 @@
 Wad* fileWad;
 
 static int getattr_callback(const char *path, struct stat *st){
-	memset(stbuf, 0, sizeof(struct stat));
-	string copy_path = path;
+	memset(st, 0, sizeof(struct stat));
+	std::string copy_path = std::string(path);
+	//void * buf = NULL;
+	//filler(buf, copy_path.c_str(), NULL, 0);
 	
-	if (copy_path.length() >= 1 && copy_path.substr(copy_path.length() - 1) == "/") {
-		copy_path = copy_path.substr(0, copypath.length()-1);
-	}
 	if (fileWad->isDirectory(copy_path)) {
 		st->st_mode = S_IFDIR | 0555;
 		st->st_nlink = 2;
@@ -28,7 +27,6 @@ static int getattr_callback(const char *path, struct stat *st){
 		st->st_size = fileWad->getSize(copy_path);
 		return 0;
 	}
-
 	return -ENOENT;
 }
 
@@ -38,9 +36,9 @@ static int readdir_callback(const char *path, void *buf, fuse_fill_dir_t filler,
 
 	filler(buf, ".", NULL, 0);
 	filler(buf, "..", NULL, 0);
-	vector<stirng> entries;
-	
-	string copy_path = path;
+	vector<string> entries;
+	fprintf(stdout, "test");
+	string copy_path(path);
 	if (copy_path.length() >= 1 && copy_path.substr(copy_path.length() - 1) != "/") {
 		copy_path = copy_path + "/";
 	}
@@ -48,6 +46,8 @@ static int readdir_callback(const char *path, void *buf, fuse_fill_dir_t filler,
 		copy_path = "/";
 	}
 	fileWad->getDirectory(copy_path, &entries);
+	string test = "hello world";
+	//filler(buf, test.c_str(), NULL, 0);
 	for (string entry : entries) {
 		filler(buf, entry.c_str(), NULL, 0);
 	}
@@ -67,13 +67,13 @@ static int release_callback(const char *path, struct fuse_file_info *fi) {
 	return 0;
 }
 
-static int releaseddir_callback(const char *path, struct fuse_file_info *fi) {
+static int releasedir_callback(const char *path, struct fuse_file_info *fi) {
 	return 0;
 }
 
 static int read_callback(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
-	if (wadFile->isContent(path)) {
-		return wadFile->getContents(path, buf, size, offset); 
+	if (fileWad->isContent(path)) {
+		return fileWad->getContents(path, buf, size, offset); 
 	}
 
 	return -ENOENT;
@@ -90,8 +90,11 @@ int main(int argc, char *argv[]) {
 	fuse_example_operations.release = release_callback;
 	fuse_example_operations.releasedir = releasedir_callback;
 
-	wadFile = Wad::loadWad(argv[1]);
-	argv[1] = arg[2];
+	fileWad = Wad::loadWad(argv[1]);
+	argv[1] = argv[2];
+	argv[2] = NULL;
+	cout << "finished delete arg 2" << endl;
+	cout << "directory " << fileWad->isDirectory("/") << endl;
 	
 	return fuse_main(--argc, argv, &fuse_example_operations, NULL);
 }
