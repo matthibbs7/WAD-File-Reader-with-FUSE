@@ -124,10 +124,13 @@ Wad::Wad(uint8_t *pData){
                 curr_level = 0;
                 curr_node = root;
 		
-		
+		string name2 = name;
+		name2.replace(name2.find("_START"),6, "");
+		//cout << "New dir name is: " << endl;
+		//cout << name2 << endl;
 		
                 if (level == 0) {
-		    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/'));
+		    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name2, currPath += (name2 + '/'));
 		    curr_node->children.push_back(temp);
                	    all_nodes.push_back(temp);
 		} else {
@@ -135,7 +138,7 @@ Wad::Wad(uint8_t *pData){
                         curr_node = curr_node->children[curr_node->children.size()-1];
                         curr_level++;
                     }
-		    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/'));
+		    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name2, currPath += (name2 + '/'));
                     curr_node->children.push_back(temp);
                     all_nodes.push_back(temp);
 		}
@@ -238,21 +241,26 @@ int Wad::getSize(const string &path){
 
 
 int Wad::getContents(const string &path, char *buffer, int length, int offset){
+	cout << "GET CONTENTS CALLED" << endl;
 	if (isDirectory(path)) return -1;
 	string path_copy;
 	for (int i = 0; i < all_nodes.size(); i++) {
 		path_copy = all_nodes[i]->descriptor_path;
 		path_copy.erase(remove(path_copy.begin(), path_copy.end(), '\0'), path_copy.end());
+		// found file
+		///cout << path_copy << endl;
 		if (path.compare(path_copy.substr(0,path.length())) == 0) {
-			if (all_nodes[i]->element_length < offset + length) {
-				length = all_nodes[i]->element_length - offset;
+			//cout << "found file" << endl;
+			//buffer = (char*)malloc(length*(sizeof(char)));
+			for (int k = offset; k < length; k++) {
+				buffer[k] = Data[all_nodes[i]->element_offset + k];
 			}
-			for (int k = 0; k < length; k++) {
-				buffer[k] = Data[all_nodes[i]->element_offset + k + offset];
-			}
+			//if (all_nodes[i]->element_length < offset + length) {
+			//	length = all_nodes[i]->element_length - offset;
+			//}
+			
 			return length;
 		}
-		return -1;
 	}
 	return -1;
 }

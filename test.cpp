@@ -10,7 +10,13 @@ int main(){
     cout << new_file->getSize("/E1M0/01.txt") << endl;
     //cout << "TESTING isContent()" << endl;
     //cout << new_file->isContent("/M_THERMM") << endl;
-	
+    cout << "TESTING getContent()" << endl;
+    char* buffer = (char*) malloc(17);
+    cout << new_file->getContents("/mp.txt", buffer, 398, 0) << endl;
+    //printf("%s", buffer);
+	//cout << buffer[0] << endl;
+	std::string Str = std::string(buffer);
+    cout << Str << endl;
 
     //cout << "TESTING getDirectory()" << endl;
    // vector<string> filler;
