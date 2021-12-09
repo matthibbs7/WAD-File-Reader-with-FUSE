@@ -3,7 +3,6 @@
 Wad::Wad(uint8_t *pData){
     unsigned int    header_desc_num,    //header descriptor number
                     header_desc_off,    //header descriptors offset
-                    check_desc_num = 1, //compare descriptor number to read value
                     i;                  //counter variables
     string          header_magic;       //header magic (file type)
     Data = pData;
@@ -42,15 +41,15 @@ Wad::Wad(uint8_t *pData){
 
         // Element Offset
         curr_element_offset = int((unsigned char)(pData[offset]) |
-                      (unsigned char)(pData[offset+1]) << 8 |
-                      (unsigned char)(pData[offset+2]) << 16 |
-                      (unsigned char)(pData[offset+3]) << 24);
+                                  (unsigned char)(pData[offset+1]) << 8 |
+                                  (unsigned char)(pData[offset+2]) << 16 |
+                                  (unsigned char)(pData[offset+3]) << 24);
 
         // Element Length
         curr_element_length = int((unsigned char)(pData[offset+4]) |
-                      (unsigned char)(pData[offset+5]) << 8 |
-                      (unsigned char)(pData[offset+6]) << 16 |
-                      (unsigned char)(pData[offset+7]) << 24);
+                                  (unsigned char)(pData[offset+5]) << 8 |
+                                  (unsigned char)(pData[offset+6]) << 16 |
+                                  (unsigned char)(pData[offset+7]) << 24);
 
         // Descriptor Name
         for (int j = 0; j < 8; j++) {
@@ -67,10 +66,10 @@ Wad::Wad(uint8_t *pData){
                 curr_level++;
             }
 
-	    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath + name);
+            TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath + name);
             curr_node->children.push_back(temp);
             all_nodes.push_back(temp);
-	    ten_elements--;
+            ten_elements--;
             if (ten_elements == 0) {
                 level--;
                 int pathSize = currPath.length();
@@ -85,7 +84,7 @@ Wad::Wad(uint8_t *pData){
                 continue;
             }
         }
-	string name_copy = name;
+        string name_copy = name;
         // If it is directory
         if (curr_element_length == 0) {
             // Start 10 element Dir
@@ -95,9 +94,9 @@ Wad::Wad(uint8_t *pData){
                 
                 // at root '/'
                 if (level == 0) {
-		    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/'));
+                    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/'));
                     curr_node->children.push_back(temp);
-	  	    all_nodes.push_back(temp);
+                    all_nodes.push_back(temp);
                 }
                 // create root in subdirectory ex: '/example/HERE'
                 else {
@@ -105,36 +104,36 @@ Wad::Wad(uint8_t *pData){
                         curr_node = curr_node->children[curr_node->children.size()-1];
                         curr_level++;
                     }
-		    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/'));
+                    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath += (name + '/'));
                     curr_node->children.push_back(temp);
-		    all_nodes.push_back(temp);
-                    
-		}
-            
+                    all_nodes.push_back(temp);
+                }
+
                 ten_elements = 10;
                 mapMarker = name;
                 level++;
             } // Open Dir
-            else if ((name[1] == '_' && name[2] == 'S' && name[3] == 'T' && name[4] == 'A' && name[5] == 'R' && name[6] == 'T') || (name[2] == '_' && name[3] == 'S' && name[4] == 'T' && name[5] == 'A' && name[6] == 'R' && name[7] == 'T')) {
+            else if ((name[1] == '_' && name[2] == 'S' && name[3] == 'T' && name[4] == 'A' && name[5] == 'R' && name[6] == 'T') || 
+                    (name[2] == '_' && name[3] == 'S' && name[4] == 'T' && name[5] == 'A' && name[6] == 'R' && name[7] == 'T')) {
                 curr_level = 0;
                 curr_node = root;
 		
-		string name2 = name;
-		name2.replace(name2.find("_START"),6, "");
+                string name2 = name;
+                name2.replace(name2.find("_START"),6, "");
 		
                 if (level == 0) {
-		    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name2, currPath += (name2 + '/'));
-		    curr_node->children.push_back(temp);
+                    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name2, currPath += (name2 + '/'));
+                    curr_node->children.push_back(temp);
                	    all_nodes.push_back(temp);
-		} else {
+                } else {
                     while (curr_level < level) {
                         curr_node = curr_node->children[curr_node->children.size()-1];
                         curr_level++;
                     }
-		    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name2, currPath += (name2 + '/'));
+	        	    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name2, currPath += (name2 + '/'));
                     curr_node->children.push_back(temp);
                     all_nodes.push_back(temp);
-		}
+                }
 
                 level++;
             } // End Dir
@@ -153,21 +152,20 @@ Wad::Wad(uint8_t *pData){
             curr_level = 0;
             curr_node = root;
             if (level == 0) {
-		TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath + name);
+	        	TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath + name);
                 curr_node->children.push_back(temp);
-		all_nodes.push_back(temp);
+        		all_nodes.push_back(temp);
             } else {
                 while (curr_level < level) {
                     curr_node = curr_node->children[curr_node->children.size()-1];
                     curr_level++;
                 }
-		TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath +name);
+		        TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name, currPath +name);
                 curr_node->children.push_back(temp);
-		all_nodes.push_back(temp);
+        		all_nodes.push_back(temp);
             }
         }
         offset += 16;
-        check_desc_num++;   //increment desc num check
     }
 
     my_root = root;
@@ -195,7 +193,7 @@ string Wad::getMagic(){
 }
 
 bool Wad::isContent(const string &path){
-    	// /dir1/sample1.txt
+    // /dir1/sample1.txt
 	if (isDirectory(path)) return false;
 	string path_copy;
 	for (int i = 0; i < all_nodes.size(); i++) {
@@ -226,7 +224,7 @@ bool Wad::isDirectory(const string &path){
 }
 
 int Wad::getSize(const string &path){
-    	if (isDirectory(path)) return -1;
+    if (isDirectory(path)) return -1;
 	string path_copy;
 	for (int i = 0; i < all_nodes.size(); i++) {
 		path_copy = all_nodes[i]->descriptor_path;
@@ -239,10 +237,7 @@ int Wad::getSize(const string &path){
 	return -1;
 }
 
-
-
 int Wad::getContents(const string &path, char *buffer, int length, int offset){
-	cout << "GET CONTENTS CALLED" << endl;
 	if (isDirectory(path)) return -1;
 	string path_copy;
 	for (int i = 0; i < all_nodes.size(); i++) {
@@ -260,7 +255,7 @@ int Wad::getContents(const string &path, char *buffer, int length, int offset){
 }
 
 int Wad::getDirectory(const string &path, vector<string> *directory){
-    	string path_copy;
+    string path_copy;
 	int num_elements = 0;
 	if (path.compare("/") == 0) {
 		int level = 0;
@@ -292,7 +287,6 @@ int Wad::getDirectory(const string &path, vector<string> *directory){
 				string title = all_nodes[i]->name;
 				title.erase(remove(title.begin(), title.end(), '\0'), title.end());
 				directory->push_back(title);
-
 			}
 		}
 		return num_elements;
