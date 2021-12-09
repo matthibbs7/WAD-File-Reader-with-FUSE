@@ -57,11 +57,8 @@ Wad::Wad(uint8_t *pData){
             name += pData[offset+j+8];
         }
 
-        //debug
- 	//cout << currPath + name << endl;       
         // If it is a marker element
         if (ten_elements > 0) {
-            //int counter = count(currPath.begin(), currPath.end(), '/');
             curr_level = 0;
             curr_node = root;
 
@@ -89,8 +86,6 @@ Wad::Wad(uint8_t *pData){
             }
         }
 	string name_copy = name;
-	//name_copy = replaceAll(name_copy, {'\0'}, "");
-	//cout << "NAME LENGTH2 : " << name.length() << "LAST CHAR DETECTED: " << name_copy[name_copy.length()-1] << endl;
         // If it is directory
         if (curr_element_length == 0) {
             // Start 10 element Dir
@@ -126,8 +121,6 @@ Wad::Wad(uint8_t *pData){
 		
 		string name2 = name;
 		name2.replace(name2.find("_START"),6, "");
-		//cout << "New dir name is: " << endl;
-		//cout << name2 << endl;
 		
                 if (level == 0) {
 		    TreeNode* temp = new TreeNode(curr_element_offset, curr_element_length, name2, currPath += (name2 + '/'));
@@ -180,11 +173,19 @@ Wad::Wad(uint8_t *pData){
     my_root = root;
 }
 
+Wad::~Wad() {
+	delete [] my_root;
+	delete [] Data;
+}
+
 Wad* Wad::loadWad(const string &path){
+    
     ifstream wadFile(path, std::ios::binary | std::ios::ate);
     streamsize wadFilesize = wadFile.tellg();
     uint8_t *pData = new uint8_t[(unsigned int)wadFilesize];
+    
     wadFile.seekg(0, std::ios::beg);
+    // read into pointer Data buffer
     wadFile.read((char *)pData, wadFilesize);
     return new Wad(pData);
 }
@@ -248,26 +249,15 @@ int Wad::getContents(const string &path, char *buffer, int length, int offset){
 		path_copy = all_nodes[i]->descriptor_path;
 		path_copy.erase(remove(path_copy.begin(), path_copy.end(), '\0'), path_copy.end());
 		// found file
-		///cout << path_copy << endl;
 		if (path.compare(path_copy.substr(0,path.length())) == 0) {
-			//cout << "found file" << endl;
-			//buffer = (char*)malloc(length*(sizeof(char)));
 			for (int k = offset; k < length; k++) {
 				buffer[k] = Data[all_nodes[i]->element_offset + k];
 			}
-			//if (all_nodes[i]->element_length < offset + length) {
-			//	length = all_nodes[i]->element_length - offset;
-			//}
-			
 			return length;
 		}
 	}
 	return -1;
 }
-
-//int Wad::getDirectory(const string &path, vector<string> *directory) {
-
-//}
 
 int Wad::getDirectory(const string &path, vector<string> *directory){
     	string path_copy;
@@ -282,8 +272,6 @@ int Wad::getDirectory(const string &path, vector<string> *directory){
 			num_elements++;
 			path_copy.erase(0,1);
 			if (path_copy[path_copy.length()-1] == '/') path_copy.pop_back();
-			//cout << "Added: " << path_copy << " " << path_copy.length() << " to vector" << endl;
-			//cout << "Compared with name: " << all_nodes[i]->name << " " << all_nodes[i]->name.length() << endl;
 			directory->push_back(path_copy);
 		}
 		return num_elements;
@@ -300,11 +288,9 @@ int Wad::getDirectory(const string &path, vector<string> *directory){
 				if (std::count(path_copy.begin(), path_copy.end(), '/') > (level+1)) continue;
 				if (!isDirectory(path_copy) && std::count(path_copy.begin(), path_copy.end(), '/') > (level)) continue;
 				num_elements++;
-				//cout << "Added: " << path_copy << " " << path_copy.length() << " to vector compared" << endl;
 				
 				string title = all_nodes[i]->name;
 				title.erase(remove(title.begin(), title.end(), '\0'), title.end());
-				//cout << "With name: " << all_nodes[i]->name << " " << title.length() << endl;
 				directory->push_back(title);
 
 			}
@@ -313,25 +299,5 @@ int Wad::getDirectory(const string &path, vector<string> *directory){
 	}
 	return -1;
 }
-/*
-int Wad::getDirectory(const string &path, vector<string> *directory) {
-	if (isContent(path)) return -1;
-	cout << "test" << endl;
-	string copy_path;
-	if (path.compare("/") != 0) {
-	for (int i = 0; i < all_nodes.size(); i++) {
-		copy_path = all_nodes[i]->descriptor_path;
-		copy_path.erase(remove(copy_path.begin(), copy_path.end(), '\0'), copy_path.end());
-		cout << copy_path << endl;
-		if (path.compare(copy_path.substr(0,path.length())) == 0) {
-			string title;
-			for (int k = 0; k < all_nodes[i]->children.size(); k++) {
-				title = all_nodes[i]->children[k]->name;
-				title.erase(remove(title.begin(), title.end(), '\0'), title.end());
-				directory->push_back(title);
-			}
-		}
-	}
-	}
-}
-*/
+
+

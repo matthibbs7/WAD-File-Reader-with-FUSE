@@ -8,13 +8,15 @@
 #include "libWad.h"
 
 Wad* fileWad;
+static struct fuse_operations my_fuse;
 
 static int getattr_callback(const char *path, struct stat *st){
+	// allocate memory for the fuse struct
 	memset(st, 0, sizeof(struct stat));
+	// create string obj from char*
 	std::string copy_path = std::string(path);
-	//void * buf = NULL;
-	//filler(buf, copy_path.c_str(), NULL, 0);
 	
+	// if we have a directory set permissions
 	if (fileWad->isDirectory(copy_path)) {
 		st->st_mode = S_IFDIR | 0555;
 		st->st_nlink = 2;
@@ -34,10 +36,10 @@ static int readdir_callback(const char *path, void *buf, fuse_fill_dir_t filler,
 	(void) offset;
 	(void) fi;
 
+	vector<string> elements;
 	filler(buf, ".", NULL, 0);
 	filler(buf, "..", NULL, 0);
-	vector<string> entries;
-	fprintf(stdout, "test");
+	
 	string copy_path(path);
 	if (copy_path.length() >= 1 && copy_path.substr(copy_path.length() - 1) != "/") {
 		copy_path = copy_path + "/";
@@ -45,10 +47,8 @@ static int readdir_callback(const char *path, void *buf, fuse_fill_dir_t filler,
 	if (copy_path.size() == 0) {
 		copy_path = "/";
 	}
-	fileWad->getDirectory(copy_path, &entries);
-	string test = "hello world";
-	//filler(buf, test.c_str(), NULL, 0);
-	for (string entry : entries) {
+	fileWad->getDirectory(copy_path, &elements);
+	for (string entry : elements) {
 		filler(buf, entry.c_str(), NULL, 0);
 	}
 
@@ -78,24 +78,18 @@ static int read_callback(const char *path, char *buf, size_t size, off_t offset,
 
 	return -ENOENT;
 }
-
-static struct fuse_operations fuse_example_operations;
-
 int main(int argc, char *argv[]) {
-	fuse_example_operations.getattr = getattr_callback;
-	fuse_example_operations.open = open_callback;
-	fuse_example_operations.read = read_callback;
-	fuse_example_operations.readdir = readdir_callback;
-	fuse_example_operations.opendir = opendir_callback;
-	fuse_example_operations.release = release_callback;
-	fuse_example_operations.releasedir = releasedir_callback;
+	my_fuse.getattr = getattr_callback;
+	my_fuse.open = open_callback;
+	my_fuse.read = read_callback;
+	my_fuse.readdir = readdir_callback;
+	my_fuse.opendir = opendir_callback;
+	my_fuse.release = release_callback;
+	my_fuse.releasedir = releasedir_callback;
 
 	fileWad = Wad::loadWad(argv[1]);
 	argv[1] = argv[2];
 	argv[2] = NULL;
-	cout << "finished delete arg 2" << endl;
-	cout << "directory " << fileWad->isDirectory("/") << endl;
-	
-	return fuse_main(--argc, argv, &fuse_example_operations, NULL);
+	return fuse_main(--argc, argv, &my_fuse, NULL);
 }
 

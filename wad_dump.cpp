@@ -54,4 +54,5 @@ int main(int argc, char** argv)
 
     Wad *myWad = Wad::loadWad(argv[1]);
     exploreDirectory(myWad, "/");
+   // Wad::~Wad();
 }
