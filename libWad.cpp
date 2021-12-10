@@ -172,7 +172,8 @@ Wad::Wad(uint8_t *pData){
 }
 
 Wad::~Wad() {
-	delete [] my_root;
+	delete(my_root);
+	
 	delete [] Data;
 }
 

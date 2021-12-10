@@ -89,7 +89,8 @@ int main(int argc, char *argv[]) {
 
 	fileWad = Wad::loadWad(argv[1]);
 	argv[1] = argv[2];
-	argv[2] = NULL;
-	return fuse_main(--argc, argv, &my_fuse, NULL);
+	argv[2] = NULL; 
+	fuse_main(--argc, argv, &my_fuse, NULL);
+	delete(fileWad);
 }
 

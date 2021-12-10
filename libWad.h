@@ -18,7 +18,7 @@ class TreeNode {
 		int element_length;
 		string name;
 		string descriptor_path;
-	
+		bool destroyed;	
 		vector<TreeNode*> children;
 
 		TreeNode(int offset, int length, string title, string path) {
@@ -26,6 +26,7 @@ class TreeNode {
 			element_length = length;
 			name = title;
 			descriptor_path = path;
+			destroyed = false;
 		}
 
 		TreeNode(int offset, int length, string title, string path, vector<TreeNode*> child) {
@@ -34,6 +35,14 @@ class TreeNode {
 			name = title;
 			descriptor_path = path;
 			children = child;
+			destroyed = false;
+		}
+		~TreeNode() {
+			destroyed = true;
+			for (int i = 0; i < children.size(); i++) {
+				if (!children[i]->destroyed)
+					delete(children[i]);
+			}
 		}
 };
 

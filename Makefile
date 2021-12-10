@@ -3,8 +3,8 @@ all: clean libWad test wadfs #default
 	sudo chmod 666 /dev/fuse
 	./waddump DOOM1.WAD
 	#./test
-	#./wadfs sample1.wad mount/
-	#mount | tail -n1
+	./wadfs sample1.wad mount/
+	mount | tail -n1
 libWad: libWad.cpp  #library
 	g++ -Wall -c libWad.cpp
 	ar rcs libWad.a libWad.o
