@@ -1,0 +1,33 @@
+.TH p3.txt "Project 3"
+.SH NAME
+P3 - File Systems
+.SH SYNOPSIS:
+Develop library to read WAD file and implement userspace FUSE daemon
+.SH FILES
+For WAD library, I declared function headers in Wad.h and definitions in Wad.cpp, the makefile will create a library. Which handle reading WAD into N-ary Tree.
+For fuse daemon, I created wadfs.cpp where all fuse api calls are made.
+.SH WHY THOSE ADDITIONS
+First I created libWad.h, this header file includes a class TreeNode which is used to store Descriptors from WAD file. Wad class has several vars, a TreeNode* to root of tree and vector that
+ stores all nodes. In Wad.cpp, loadWad uses ifstream: reads data in as a pointer buffer. then calls Wad constructor. Constructor first reads magic, then for the num of desc and offset, I had to 
+bit shift from unsigned char to int to convert 4 bytes to an int. Then I cycle num of descriptors, reads name same way, then checks if marker element, otherwise if directory, determine if it is
+ of _START type or not. then add directory Node to TreeNode and vector of allnodes. If regular element, add to TreeNode as file type. For isDirectory() checks if root case, otherwise check
+if element length is 0. For isContent() check if isDirectory, otherwise goto path and confirm element length !=0 then we know its file. getSize(), searches the vector of nodes for the path then
+returns element-length at node. getContents goes to node with path and writes to buffer[k] from data* from loadWad, and adds offset. getDirectory checks for root '/' case
+then counts elements that have the same path of immediate path directory entered, and returns names of them in vector. for wadfs.cpp I setup the fuse_operations struct and 
+basic functionality. getattr_callback checks if we have directory or content, sets the permissions to either 0555 or 0444 for write/read and returns getsize for content. readdir_callback allows me
+ to see contents within a directory and return elements, checks if root case, else simply fills uses the getDirectory vector. read_callback allows file contents to be gathered, calls 
+getContents on file content and returns. main sets all functions and loadWad, then after call to fusemain deletes wad class pointer which deallocates all allocated memory.
+ 
+.SH TESTING
+To test wad.cpp/wad.h I created a test.cpp program that calls each of the WAD functions to make sure output is right. I used wad_dump.cpp to compare sample1.wad/sample2.wad/DOOM1.WAD dump outputs
+and made sure it aligned. I used valgrind on my test executable to check memleaks. 
+To test fuse/wadfs.cpp I created a dir called mount and ran ./wadfs mount then compared whether files were successfully created with permissions by trying to cat. I had memleak bugs 
+with treenode class, but after installing a destuctor I was able to deallocate all node pointers.
+.SH REFERENCES
+"Writing simple filesystem using fuse" - shorturl.at/fxBGL
+"C destructor of an n-ary tree" - shorturl.at/emsGX
+"Read/write binary files in C" - shorturl.at/cjoG8
+.SH SCREENCAST
+https://youtu.be/qIroTF1-auU
+.SH AUTHOR
+Matthew Hibbs
